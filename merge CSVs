@@ -1,0 +1,71 @@
+with year_2019 AS(
+SELECT 
+	*
+FROM 
+	public."2019"
+),
+
+year_2020 AS(
+SELECT 
+	*
+FROM 
+	public."2020"
+),
+
+year_2021 AS(
+SELECT 
+	*
+FROM 
+	public."2021"
+),
+
+merging AS (
+  SELECT
+    Country,
+    COALESCE(y_2019, 0) AS y_2019,
+    COALESCE(y_2020, 0) AS y_2020,
+    COALESCE(y_2021, 0) AS y_2021
+  FROM (
+  
+SELECT
+  year_2019."Country_of_origin" AS Country,
+  year_2019."Total" AS y_2019,
+  year_2020."Total" AS y_2020,
+  year_2021."Total" AS y_2021
+FROM
+  year_2019
+LEFT JOIN
+  year_2020 ON year_2019."Country_of_origin" = year_2020."Country_of_origin"
+LEFT JOIN
+  year_2021 ON year_2019."Country_of_origin" = year_2021."Country_of_origin"
+) AS subquery
+),
+
+--select * from merging;
+ 
+-- above works
+
+--with 
+country_mapping AS (
+SELECT
+  UPPER(name) AS name,
+  COALESCE(region, 'other') AS region,
+  COALESCE(sub_region, 'other') AS sub_region
+FROM
+	public.country_codes as c
+)
+
+--select * from country_mapping;
+-- above works
+
+SELECT
+  Country,
+  region,
+  sub_region,
+  y_2019 + y_2020 + y_2021 AS Total
+FROM
+  merging as m
+LEFT JOIN
+  country_mapping ON m.Country = country_mapping.name
+ORDER BY
+  Total DESC;
