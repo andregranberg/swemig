@@ -1,0 +1,8 @@
+import pandas as pd
+
+df = pd.read_csv('name.csv')
+
+from sqlalchemy import create_engine
+
+engine = create_engine('postgresql://postgres:Bert250senap!@localhost:5432/database_name')
+df.to_sql('table_name', engine, index=False)
